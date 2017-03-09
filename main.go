@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -13,10 +14,12 @@ import (
 )
 
 var (
-	ErrKeyNotFound   = errors.New("key not found")
-	ErrInvalidObject = errors.New("invalid object")
-	ErrInvalidIndex  = errors.New("invalid index")
-	ErrInvalidKey    = errors.New("invalid key")
+	// ErrKeyNotFound is returned whenever the give key does not exist within the yaml object
+	ErrKeyNotFound = errors.New("key not found")
+	// ErrInvalidIndex is returned when the array index is not integer
+	ErrInvalidIndex = errors.New("invalid index")
+	// ErrInvalidKey is returned when the given key is invalid
+	ErrInvalidKey = errors.New("invalid key")
 
 	keyPairs   string
 	outputFile string
@@ -31,10 +34,6 @@ func parseFlags() {
 
 	if keyPairs == "" {
 		log.Fatalf("-key-pairs flag is not set")
-	}
-
-	if inputFile == "" {
-		log.Fatalf("-f is not set")
 	}
 }
 
@@ -96,13 +95,18 @@ func output(t interface{}) {
 	writeYaml(d)
 }
 
-func mustReadYaml() []byte {
-	dat, err := ioutil.ReadFile(inputFile)
+func mustReadYaml() (dat []byte) {
+	var err error
+	if inputFile != "" {
+		dat, err = ioutil.ReadFile(inputFile)
+	} else {
+		dat, err = ioutil.ReadAll(os.Stdin)
+	}
 	if err != nil {
 		log.Fatalf("Could not read input file: %s", err)
 	}
 
-	return dat
+	return
 }
 
 func writeYaml(output []byte) {
