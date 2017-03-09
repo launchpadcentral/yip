@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -33,10 +34,6 @@ func parseFlags() {
 
 	if keyPairs == "" {
 		log.Fatalf("-key-pairs flag is not set")
-	}
-
-	if inputFile == "" {
-		log.Fatalf("-f is not set")
 	}
 }
 
@@ -98,13 +95,18 @@ func output(t interface{}) {
 	writeYaml(d)
 }
 
-func mustReadYaml() []byte {
-	dat, err := ioutil.ReadFile(inputFile)
+func mustReadYaml() (dat []byte) {
+	var err error
+	if inputFile != "" {
+		dat, err = ioutil.ReadFile(inputFile)
+	} else {
+		dat, err = ioutil.ReadAll(os.Stdin)
+	}
 	if err != nil {
 		log.Fatalf("Could not read input file: %s", err)
 	}
 
-	return dat
+	return
 }
 
 func writeYaml(output []byte) {
