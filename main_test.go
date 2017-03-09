@@ -28,6 +28,10 @@ var primitiveListInput = `audit-api:
 - api2
 `
 
+var booleanValueInput = `
+key: true
+`
+
 func readYaml(t *testing.T, input string) (output map[interface{}]interface{}) {
 	err := yaml.Unmarshal([]byte(input), &output)
 	if err != nil {
@@ -188,6 +192,22 @@ func TestUpdateYamlListPrimitiveElementInvalidKey(t *testing.T) {
 		t.Fatalf("expected %s, got %s", ErrInvalidKey, err)
 	}
 
+}
+
+func TestUpdateYamlBooleanValueInput(t *testing.T) {
+	yaml := readYaml(t, booleanValueInput)
+
+	output, err := updateYaml(yaml, "key", false)
+	if err != nil {
+		t.Fatalf("expected nil, got %s", err)
+	}
+
+	res := testWriteYaml(t, output)
+	expectedYaml := `key: false
+`
+	if res != expectedYaml {
+		t.Fatalf("expected:\n%#v\n,got:\n%#v", expectedYaml, res)
+	}
 }
 
 func TestParseInput(t *testing.T) {

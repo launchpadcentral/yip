@@ -41,7 +41,7 @@ func parseFlags() {
 func main() {
 
 	updates := validateInput()
-	t := yamlInput()
+	t := mustParseYaml()
 
 	var err error
 	for i := 0; i < len(updates); i += 2 {
@@ -71,7 +71,7 @@ func validateInput() []string {
 	return updates
 }
 
-func yamlInput() interface{} {
+func mustParseYaml() interface{} {
 	data := mustReadYaml()
 
 	var t interface{}
@@ -155,7 +155,7 @@ func updateYaml(input interface{}, key string, value interface{}) (interface{}, 
 		subArray[index] = val
 
 		return subArray, nil
-	case string, int:
+	case string, int, bool:
 		if len(keys) == 0 || keys[0] == "" {
 			return value, nil
 		}
