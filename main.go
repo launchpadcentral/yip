@@ -155,7 +155,7 @@ func updateYaml(input interface{}, key string, value interface{}) (interface{}, 
 		subArray[index] = val
 
 		return subArray, nil
-	case string, int, bool:
+	case string, int, bool, float64:
 		if len(keys) == 0 || keys[0] == "" {
 			return value, nil
 		}

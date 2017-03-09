@@ -32,6 +32,10 @@ var booleanValueInput = `
 key: true
 `
 
+var floatValueInput = `
+key: 12.42532
+`
+
 func readYaml(t *testing.T, input string) (output map[interface{}]interface{}) {
 	err := yaml.Unmarshal([]byte(input), &output)
 	if err != nil {
@@ -204,6 +208,22 @@ func TestUpdateYamlBooleanValueInput(t *testing.T) {
 
 	res := testWriteYaml(t, output)
 	expectedYaml := `key: false
+`
+	if res != expectedYaml {
+		t.Fatalf("expected:\n%#v\n,got:\n%#v", expectedYaml, res)
+	}
+}
+
+func TestUpdateYamlFloatValueInput(t *testing.T) {
+	yaml := readYaml(t, floatValueInput)
+
+	output, err := updateYaml(yaml, "key", 11.47285)
+	if err != nil {
+		t.Fatalf("expected nil, got %s", err)
+	}
+
+	res := testWriteYaml(t, output)
+	expectedYaml := `key: 11.47285
 `
 	if res != expectedYaml {
 		t.Fatalf("expected:\n%#v\n,got:\n%#v", expectedYaml, res)
