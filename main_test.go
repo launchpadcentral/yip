@@ -90,7 +90,7 @@ audit-api:
 
 	_, err := updateYaml(yaml, "audit-api.api.imageTag", 123)
 	if err != ErrInvalidKey {
-		t.Errorf("expected %s, got %v", ErrInvalidObject, err)
+		t.Errorf("expected %s, got %v", ErrInvalidKey, err)
 	}
 
 }
