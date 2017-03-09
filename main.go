@@ -13,10 +13,12 @@ import (
 )
 
 var (
-	ErrKeyNotFound   = errors.New("key not found")
-	ErrInvalidObject = errors.New("invalid object")
-	ErrInvalidIndex  = errors.New("invalid index")
-	ErrInvalidKey    = errors.New("invalid key")
+	// ErrKeyNotFound is returned whenever the give key does not exist within the yaml object
+	ErrKeyNotFound = errors.New("key not found")
+	// ErrInvalidIndex is returned when the array index is not integer
+	ErrInvalidIndex = errors.New("invalid index")
+	// ErrInvalidKey is returned when the given key is invalid
+	ErrInvalidKey = errors.New("invalid key")
 
 	keyPairs   string
 	outputFile string
