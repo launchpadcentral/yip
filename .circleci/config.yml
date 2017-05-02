@@ -1,0 +1,28 @@
+version: 2
+jobs:
+  build:
+    working_directory: /go/src/github.com/launchpadcentral/yip
+    docker:
+    - image: quay.io/glidr/builder:golang1.7.5
+    environment:
+      TEST_RESULTS: /tmp/test-results
+    steps:
+    - checkout
+    - run:
+        name: Install JUnit
+        command: |
+          go get github.com/jstemmer/go-junit-report
+    - run: mkdir -p /tmp/test-results
+    - run:
+        name: Install dependencies
+        command: |
+          git config --global url."git@github.com:".insteadOf "https://github.com/"
+          go get -t -v ./...
+    - run:
+        name: Run unit tests
+        command: |
+          git clone git@github.com:launchpadcentral/helm-charts.git
+          ./helm-charts/scripts/test_microservice.sh
+          bash <(curl -s https://codecov.io/bash) -t 3b7f7b0d-5ae5-4e80-85ed-9833aefd8a2e
+    - store_test_results:
+        path: /tmp/test-results
