@@ -4,6 +4,9 @@ jobs:
     working_directory: /go/src/github.com/launchpadcentral/yip
     docker:
     - image: quay.io/glidr/builder:golang1.7.5
+      auth:
+        username: $QUAY_USERNAME
+        password: $QUAY_PASSWORD
     environment:
       TEST_RESULTS: /tmp/test-results
     steps:
@@ -26,3 +29,11 @@ jobs:
           bash <(curl -s https://codecov.io/bash) -t 3b7f7b0d-5ae5-4e80-85ed-9833aefd8a2e
     - store_test_results:
         path: /tmp/test-results
+workflows:
+  version: 2
+  test-and-build:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: master
