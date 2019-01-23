@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: /go/src/github.com/launchpadcentral/yip
     docker:
-    - image: quay.io/glidr/builder:golang1.7.5
+    - image: quay.io/glidr/builder:golang1.9.6
       auth:
         username: $QUAY_USERNAME
         password: $QUAY_PASSWORD
