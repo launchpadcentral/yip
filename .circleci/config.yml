@@ -24,11 +24,15 @@ jobs:
     - run:
         name: Run unit tests
         command: |
-          git clone git@github.com:launchpadcentral/helm-charts.git
-          ./helm-charts/scripts/test_microservice.sh
+          git clone git@github.com:launchpadcentral/cicd.git
+          ./cicd/scripts/test_microservice.sh
           bash <(curl -s https://codecov.io/bash) -t 3b7f7b0d-5ae5-4e80-85ed-9833aefd8a2e
     - store_test_results:
         path: /tmp/test-results
+    - slack/status:
+        fail_only: true
+        webhook: $SLACKWEBHOOK
+
 workflows:
   version: 2
   test-and-build:
