@@ -7,10 +7,8 @@ Prerequisite:
 
 Installation: (for Mac/Darwin)
   1. `git clone git@github.com:launchpadcentral/yip.git`
-  2. `cd yip`  
-  3. `mv main.go yip.go`
-  4. `export GOBIN=/usr/local/bin`
-  5. `go install yip.go`
+  2. `cd yip`
+  3. `go get && go build -o /usr/local/bin/yip`
   
 Verify via
   * `yip --version`
