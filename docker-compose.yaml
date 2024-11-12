@@ -1,5 +1,3 @@
-version: "2.1"
-
 x-common:
   &common_settings
   image: quay.io/glidr/builder:golang1.22
