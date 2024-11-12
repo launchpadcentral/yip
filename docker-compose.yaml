@@ -1,6 +1,6 @@
 x-common:
   &common_settings
-  image: quay.io/glidr/builder:golang1.22
+  image: quay.io/glidr/builder:golang1.22.5
   working_dir: /go/src/github.com/launchpadcentral/yip
   volumes:
     - ./main.go:/go/src/github.com/launchpadcentral/yip/main.go:rw
