@@ -1,10 +1,12 @@
+// Package main is a CLI tool for updating YAML files with key-value pairs,
+// supporting nested keys via dot notation and outputting to stdout or a file.
 package main
 
 import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -38,7 +40,6 @@ func parseFlags() {
 }
 
 func main() {
-
 	updates := validateInput()
 	t := mustParseYaml()
 
@@ -98,9 +99,9 @@ func output(t interface{}) {
 func mustReadYaml() (dat []byte) {
 	var err error
 	if inputFile != "" {
-		dat, err = ioutil.ReadFile(inputFile)
+		dat, err = os.ReadFile(inputFile)
 	} else {
-		dat, err = ioutil.ReadAll(os.Stdin)
+		dat, err = io.ReadAll(os.Stdin)
 	}
 	if err != nil {
 		log.Fatalf("Could not read input file: %s", err)
@@ -110,7 +111,7 @@ func mustReadYaml() (dat []byte) {
 }
 
 func writeYaml(output []byte) {
-	if err := ioutil.WriteFile(outputFile, output, 0644); err != nil {
+	if err := os.WriteFile(outputFile, output, 0644); err != nil {
 		log.Fatalf("Could not write the output to the file: %s", err)
 	}
 }

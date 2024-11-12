@@ -1,49 +1,71 @@
 version: 2.1
 orbs:
-  slack: circleci/slack@3.4.2
-  codecov: codecov/codecov@3.2.0
+  codecov: codecov/codecov@5.0.3
+  slack: circleci/slack@5.0.0
+
+executors:
+  golang:
+    description: "Executor using public Golang image."
+    docker:
+      - image: golang:1.22.5
+    working_directory: ~/project
 
 jobs:
   build:
-    working_directory: /go/src/github.com/launchpadcentral/yip
-    docker:
-    - image: quay.io/glidr/builder:golang1.17
-      auth:
-        username: $QUAY_USERNAME
-        password: $QUAY_PASSWORD
+    description: "Build the yip command line tool for different platforms."
+    executor: golang
+    steps:
+      - checkout
+      - run:
+          name: Build for macOS (Darwin)
+          command: |
+            go get && GOOS=darwin GOARCH=amd64 go build -o /tmp/yip-darwin-amd64
+      - run:
+          name: Build for Linux
+          command: |
+            GOOS=linux GOARCH=amd64 go build -o /tmp/yip-linux-amd64
+      - store_artifacts:
+          path: /tmp/yip-darwin-amd64
+          destination: yip-darwin-amd64
+      - store_artifacts:
+          path: /tmp/yip-linux-amd64
+          destination: yip-linux-amd64
+
+  test:
+    description: "Test microservice and upload Codecov report."
+    executor: golang
     environment:
       TEST_RESULTS: /tmp/test-results
     steps:
-    - checkout
-    - run:
-        name: Install JUnit
-        command: |
-          go get github.com/jstemmer/go-junit-report
-    - run: mkdir -p /tmp/test-results
-    - run:
-        name: Install dependencies
-        command: |
-          git config --global url."git@github.com:".insteadOf "https://github.com/"
-          go get -t -v ./...
-    - run:
-        name: Run unit tests
-        command: |
-          git clone git@github.com:launchpadcentral/cicd.git
-          ./cicd/scripts/test_microservice.sh
-          apk add --no-cache gnupg
-    - codecov/upload:
-        file: coverage.lcov
-    - store_artifacts: # upload test coverage as artifact
-         path: ./coverage.lcov
-         prefix: tests
+      - checkout
+      - run:
+          name: Install junit
+          command: |
+            go install github.com/jstemmer/go-junit-report@latest
+            mkdir -p /tmp/test-results
+      - run:
+          name: Run unit tests
+          command: |
+            go test ./... -v 2>&1 | go-junit-report > /tmp/test-results/report.xml
+      - store_test_results:
+          path: /tmp/test-results
+      - codecov/upload:
+          files: /tmp/test-results/report.xml
+      - when:
+          condition: on_success
+          steps:
+            - slack/notify:
+                channel: ${SLACK_CHANNEL:-$SLACK_DEFAULT_CHANNEL}
+                event: fail
 
 workflows:
   version: 2
   test-and-build:
     jobs:
+      - test
       - build:
-          context:
-            - org-global
+          requires:
+            - test
           filters:
             branches:
               only: master
