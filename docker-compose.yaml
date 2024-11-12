@@ -1,38 +1,34 @@
 version: "2.1"
 
+x-common:
+  &common_settings
+  image: quay.io/glidr/builder:golang1.15
+  working_dir: /go/src/github.com/launchpadcentral/yip
+  volumes:
+    - ./main.go:/go/src/github.com/launchpadcentral/yip/main.go:rw
+    - ./main_test.go:/go/src/github.com/launchpadcentral/yip/main_test.go:rw
+    - ./go.mod:/go/src/github.com/launchpadcentral/yip/go.mod:rw
+    - ./go.sum:/go/src/github.com/launchpadcentral/yip/go.sum:rw
+    - ./tmp/:/tmp/:rw
+
 services:
   yip:
-    image: quay.io/glidr/builder:golang1.15
+    <<: *common_settings
     container_name: yip
-    working_dir: /go/src/github.com/launchpadcentral/yip
     command: >
       bash -c "tail -f /dev/null"
     environment:
       - GOBIN=/usr/local/go/
-    volumes:
-      - ./main.go:/go/src/github.com/launchpadcentral/yip/main.go:rw
-      - ./main_test.go:/go/src/github.com/launchpadcentral/yip/main_test.go:rw
-      - ./go.mod:/go/src/github.com/launchpadcentral/yip/go.mod:rw
-      - ./go.sum:/go/src/github.com/launchpadcentral/yip/go.sum:rw
-      - ./tmp/:/tmp/:rw
 
   yip-test:
-    image: quay.io/glidr/builder:golang1.15
+    <<: *common_settings
     container_name: yip-test
-    working_dir: /go/src/github.com/launchpadcentral/yip
     command: >
       bash -c "go test"
-    volumes:
-      - ./main.go:/go/src/github.com/launchpadcentral/yip/main.go:rw
-      - ./main_test.go:/go/src/github.com/launchpadcentral/yip/main_test.go:rw
-      - ./go.mod:/go/src/github.com/launchpadcentral/yip/go.mod:rw
-      - ./go.sum:/go/src/github.com/launchpadcentral/yip/go.sum:rw
-      - ./tmp/:/tmp/:rw
 
   yip-build:
-    image: quay.io/glidr/builder:golang1.15
+    <<: *common_settings
     container_name: yip-builder
-    working_dir: /go/src/github.com/launchpadcentral/yip
     environment:
       - GOBIN=/usr/local/go/
       - GOOS=linux
@@ -40,9 +36,3 @@ services:
       - RELEASE=0.2.0
     command: >
       bash -c "go get && GOOS=$$GOOS GOARCH=$$GOARCH go build -o /tmp/yip-$$RELEASE-$$GOOS-$$GOARCH"
-    volumes:
-      - ./main.go:/go/src/github.com/launchpadcentral/yip/main.go:rw
-      - ./main_test.go:/go/src/github.com/launchpadcentral/yip/main_test.go:rw
-      - ./go.mod:/go/src/github.com/launchpadcentral/yip/go.mod:rw
-      - ./go.sum:/go/src/github.com/launchpadcentral/yip/go.sum:rw
-      - ./tmp/:/tmp/:rw
