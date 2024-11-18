@@ -1,16 +1,33 @@
 version: 2.1
 orbs:
-  slack: circleci/slack@3.4.2
-  codecov: codecov/codecov@3.2.0
+  codecov: codecov/codecov@5.0.3
+  slack: circleci/slack@5.0.0
+
+
+executors:
+  golang:
+    docker:
+      - image: cimg/go:1.22.5
+    working_directory: ~/project
+
+commands:
+  build_packages:
+    parameters:
+      goos:
+        type: string
+      goarch:
+        type: string
+    steps:
+      - run:
+          name: Build for << parameters.goos >> (<< parameters.goarch >>)
+          command: GOOS=<< parameters.goos >> GOARCH=<< parameters.goarch >> go build -o /tmp/yip-<< parameters.goos >>-<< parameters.goarch >>
+      - store_artifacts:
+          path: /tmp/yip-<< parameters.goos >>-<< parameters.goarch >>
+          destination: yip-<< parameters.goos >>-<< parameters.goarch >>
 
 jobs:
-  build:
-    working_directory: /go/src/github.com/launchpadcentral/yip
-    docker:
-    - image: quay.io/glidr/builder:golang1.17
-      auth:
-        username: $QUAY_USERNAME
-        password: $QUAY_PASSWORD
+  test:
+    executor: golang
     environment:
       TEST_RESULTS: /tmp/test-results
     steps:
@@ -33,17 +50,47 @@ jobs:
           apk add --no-cache gnupg
     - codecov/upload:
         file: coverage.lcov
-    - store_artifacts: # upload test coverage as artifact
+    - store_artifacts:
          path: ./coverage.lcov
          prefix: tests
 
+  build:
+    parameters:
+      goos:
+        type: string
+      goarch:
+        type: string
+    executor: golang
+    steps:
+      - checkout
+      - build_packages:
+          goos: << parameters.goos >>
+          goarch: << parameters.goarch >>
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - yip-<< parameters.goos >>-<< parameters.goarch >>
+
 workflows:
   version: 2
-  test-and-build:
+  test-build:
     jobs:
+      - test
       - build:
-          context:
-            - org-global
-          filters:
-            branches:
-              only: master
+          name: build_darwin_amd64
+          goos: darwin
+          goarch: amd64
+          requires:
+            - test
+      - build:
+          name: build_darwin_arm64
+          goos: darwin
+          goarch: arm64
+          requires:
+            - test
+      - build:
+          name: build_linux_amd64
+          goos: linux
+          goarch: amd64
+          requires:
+            - test
