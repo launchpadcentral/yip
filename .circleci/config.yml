@@ -3,7 +3,6 @@ orbs:
   codecov: codecov/codecov@5.0.3
   slack: circleci/slack@5.0.0
 
-
 executors:
   golang:
     docker:
@@ -31,30 +30,29 @@ jobs:
     environment:
       TEST_RESULTS: /tmp/test-results
     steps:
-    - checkout
-    - run:
-        name: Install JUnit
-        command: |
-          go get github.com/jstemmer/go-junit-report
-    - run: mkdir -p /tmp/test-results
-    - run:
-        name: Install dependencies
-        command: |
-          git config --global url."git@github.com:".insteadOf "https://github.com/"
-          go get -t -v ./...
-    - run:
-        name: Run unit tests
-        command: |
-          git clone git@github.com:launchpadcentral/cicd.git
-          ./cicd/scripts/test_microservice.sh
-          apk add --no-cache gnupg
-    - codecov/upload:
-        file: coverage.lcov
-    - store_artifacts:
-         path: ./coverage.lcov
-         prefix: tests
+      - checkout
+      - run:
+          name: Install JUnit
+          command: go get github.com/jstemmer/go-junit-report
+      - run:
+          mkdir -p /tmp/test-results
+      - run:
+          name: Install dependencies
+          command: |
+            git config --global url."git@github.com:".insteadOf "https://github.com/"
+            go get -t -v ./...
+      - run:
+          name: Run unit tests
+          command: |
+            git clone git@github.com:launchpadcentral/cicd.git
+            ./cicd/scripts/test_microservice.sh
+            apk add --no-cache gnupg
+      - codecov/upload
+      - store_artifacts:
+          path: ./coverage.lcov
+          prefix: tests
 
-  build:
+  build_package:
     parameters:
       goos:
         type: string
@@ -73,24 +71,25 @@ jobs:
 
 workflows:
   version: 2
-  test-build:
+  test-and-build:
     jobs:
       - test
-      - build:
+      - build_package:
           name: build_darwin_amd64
           goos: darwin
           goarch: amd64
           requires:
             - test
-      - build:
+      - build_package:
           name: build_darwin_arm64
           goos: darwin
           goarch: arm64
           requires:
             - test
-      - build:
+      - build_package:
           name: build_linux_amd64
           goos: linux
           goarch: amd64
           requires:
             - test
+
