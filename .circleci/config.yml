@@ -35,22 +35,19 @@ jobs:
           name: Install JUnit
           command: go get github.com/jstemmer/go-junit-report
       - run:
-          mkdir -p /tmp/test-results
+          name: Setup test environment
+          command: mkdir -p ${TEST_RESULTS}
       - run:
-          name: Install dependencies
+          name: Run tests and collect coverage
           command: |
-            git config --global url."git@github.com:".insteadOf "https://github.com/"
-            go get -t -v ./...
-      - run:
-          name: Run unit tests
-          command: |
-            git clone git@github.com:launchpadcentral/cicd.git
-            ./cicd/scripts/test_microservice.sh
-            apk add --no-cache gnupg
-      - codecov/upload
+            ./scripts/test_microservice.sh
+      - codecov/upload:
+          files: ${TEST_RESULTS}/coverage.txt
       - store_artifacts:
-          path: ./coverage.lcov
-          prefix: tests
+          path: ${TEST_RESULTS}
+          destination: test-results
+      - store_test_results:
+          path: ${TEST_RESULTS}
 
   build_package:
     parameters:
