@@ -28,8 +28,8 @@ services:
     container_name: yip-builder
     environment:
       - GOBIN=/usr/local/go/
-      - GOOS=linux
-      - GOARCH=amd64
+      - GOOS=darwin
+      - GOARCH=arm64
       - RELEASE=0.3.0
     command: >
       bash -c "go get && GOOS=$$GOOS GOARCH=$$GOARCH go build -o /tmp/yip-$$RELEASE-$$GOOS-$$GOARCH"
