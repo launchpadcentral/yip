@@ -2,12 +2,7 @@ version: 2.1
 orbs:
   codecov: codecov/codecov@5.0.3
   slack: circleci/slack@5.0.0
-
-executors:
-  golang:
-    docker:
-      - image: cimg/go:1.22.5
-    working_directory: ~/project
+  glidr-microservice-orb: launchpadcentral/glidr-microservice-orb@volatile
 
 commands:
   build_packages:
@@ -26,7 +21,7 @@ commands:
 
 jobs:
   test:
-    executor: golang
+    executor: glidr-microservice-orb/default
     environment:
       TEST_RESULTS: /tmp/test-results
     steps:
@@ -41,6 +36,9 @@ jobs:
           name: Run tests and collect coverage
           command: |
             ./scripts/test_microservice.sh
+      - run:
+          name: Install gpg dependency
+          command: apk add --no-cache gnupg
       - codecov/upload:
           files: ${TEST_RESULTS}/coverage.txt
       - store_artifacts:
@@ -55,7 +53,7 @@ jobs:
         type: string
       goarch:
         type: string
-    executor: golang
+    executor: glidr-microservice-orb/default
     steps:
       - checkout
       - build_packages:
@@ -70,23 +68,31 @@ workflows:
   version: 2
   test-and-build:
     jobs:
-      - test
+      - test:
+          context:
+            - org-global
       - build_package:
           name: build_darwin_amd64
           goos: darwin
           goarch: amd64
+          context:
+            - org-global
           requires:
             - test
       - build_package:
           name: build_darwin_arm64
           goos: darwin
           goarch: arm64
+          context:
+            - org-global
           requires:
             - test
       - build_package:
           name: build_linux_amd64
           goos: linux
           goarch: amd64
+          context:
+            - org-global
           requires:
             - test
 
