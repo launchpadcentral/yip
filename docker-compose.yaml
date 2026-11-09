@@ -1,5 +1,5 @@
 x-common-settings: &common-settings
-  image: golang:1.22.5
+  image: golang:1.27.1
   working_dir: /go/src/github.com/launchpadcentral/yip
   volumes:
     - ./main.go:/go/src/github.com/launchpadcentral/yip/main.go:rw
