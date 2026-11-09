@@ -6,7 +6,7 @@ orbs:
 executors:
   golang:
     docker:
-      - image: cimg/go:1.22.5
+      - image: cimg/go:1.27.1
     working_directory: ~/project
 
 commands:
